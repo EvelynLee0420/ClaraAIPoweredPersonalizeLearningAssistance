@@ -1,0 +1,111 @@
+# 導入所需的庫
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.preprocessing import LabelEncoder
+import pickle
+
+# 1. 數據收集與準備
+# 假設我們有一個包含學生學習數據的檔案，例如 "student_data.csv"
+# 數據應包括以下欄位：'學習風格'、'答題時間'、'正確率'、'信心程度'、'學習策略'
+data = pd.read_csv('student_data.csv')
+
+# 2. 數據預處理
+# 將分類變數（例如 '學習風格' 和 '學習策略'）轉換為數值
+label_encoder = LabelEncoder()
+data['學習風格'] = label_encoder.fit_transform(data['學習風格'])
+data['學習策略'] = label_encoder.fit_transform(data['學習策略'])
+
+# 3. 特徵選擇和目標變數
+# 選擇用於訓練模型的特徵
+features = ['學習風格', '答題時間', '正確率', '信心程度']
+# 定義目標變數
+target = '學習策略'
+
+# 4. 數據分割
+# 將數據分割為訓練集和測試集
+X_train, X_test, y_train, y_test = train_test_split(data[features], data[target], test_size=0.2, random_state=42)
+
+# 5. 模型選擇與訓練
+# 使用隨機森林分類器
+model = RandomForestClassifier(n_estimators=100, random_state=42)  # 可以調整參數
+model.fit(X_train, y_train)
+
+# 6. 模型評估
+# 在測試集上評估模型的性能
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f'模型準確度: {accuracy}')
+print(classification_report(y_test, y_pred))
+
+# 7. 模型保存
+# 將訓練好的模型保存到檔案
+filename = 'clara_ai_model.pkl'
+pickle.dump(model, open(filename, 'wb'))
+
+# 8. 模型加載和預測（可選，用於演示如何使用模型）
+# 加載保存的模型
+loaded_model = pickle.load(open(filename, 'rb'))
+
+# 假設我們有一個新的學生數據
+new_student_data = pd.DataFrame({
+    '學習風格': [0],  # 例如：0代表視覺型學習者
+    '答題時間': [25],
+    '正確率': [0.85],
+    '信心程度': [0.92]
+})
+
+# 使用加載的模型進行預測
+predicted_strategy = loaded_model.predict(new_student_data[features])
+predicted_strategy_name = label_encoder.inverse_transform(predicted_strategy) # 將數字轉換回策略名稱
+print(f'預測的學習策略: {predicted_strategy_name[0]}')
+
+# 9.  (補充) 學習風格檢測 (如果需要，可以添加額外的程式碼來實現學習風格檢測)
+def detect_learning_style(answers):
+    """
+    根據學生在問卷中的答案檢測學生的學習風格。
+
+    參數:
+    answers (dict): 一個包含問卷答案的字典。
+                    例如: {
+                        'visual': 3,
+                        'auditory': 2,
+                        'kinesthetic': 4,
+                        'reading_writing': 1,
+                        'logical': 5,
+                        'social': 2,
+                        'solitary': 3
+                    }
+                    每個鍵代表一種學習風格，值代表學生對該風格的偏好程度。
+
+    返回:
+    str: 學習風格，例如 "視覺型", "聽覺型" 等。
+    """
+    # 在實際應用中，你需要定義一個更複雜的邏輯來根據答案確定學習風格
+    # 這裏只是一個簡單的示例
+    style_preferences = {
+        'visual': answers.get('visual', 0),
+        'auditory': answers.get('auditory', 0),
+        'kinesthetic': answers.get('kinesthetic', 0),
+        'reading_writing': answers.get('reading_writing', 0),
+        'logical': answers.get('logical', 0),
+        'social': answers.get('social', 0),
+        'solitary': answers.get('solitary', 0)
+    }
+    best_style = max(style_preferences, key=style_preferences.get)
+    return best_style
+
+# 示例用法
+# 假設這是學生回答的問卷
+student_answers = {
+    'visual': 4,
+    'auditory': 2,
+    'kinesthetic': 3,
+    'reading_writing': 1,
+    'logical': 5,
+    'social': 2,
+    'solitary': 3
+}
+detected_style = detect_learning_style(student_answers)
+print(f"檢測到的學習風格: {detected_style}")
