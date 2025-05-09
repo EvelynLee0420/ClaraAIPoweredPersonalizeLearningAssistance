@@ -41,6 +41,3 @@ Clara 是一套 AI 支援的個人學習輔助系統，專為幫助使用者掌�
 
 📌 Clara 正在成長中，未來將加入更多智慧功能如 ChatGPT 融合、提醒系統、學習節奏
 =======
-# ClaraAIPoweredPersonalizeLearningAssistance
-Clara - AI powered personalized learning assistance
->>>>>>> fced7ef72fab67e5796e7c08d4470a7027fbf848
